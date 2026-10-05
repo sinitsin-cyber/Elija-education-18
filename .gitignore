@@ -1,0 +1,17 @@
+# Локальные настройки Claude Code
+.claude/settings.local.json
+
+# Секреты
+.env
+*.env
+*.key
+*.pem
+
+# Зависимости
+node_modules/
+.venv/
+__pycache__/
+
+# Логи и временные файлы
+*.log
+*.tmp
