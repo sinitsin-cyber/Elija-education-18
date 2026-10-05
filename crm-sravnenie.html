@@ -1,0 +1,287 @@
+<title>Open-source CRM для каркасного бизнеса</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+/* Рабочая таблица-сравнение: короткая шапка, вывод, затем широкая таблица со своей прокруткой, внизу пояснения к метрикам */
+:root {
+  --bg: #f7f8f7;
+  --surface: #ffffff;
+  --fg: #1c2421;
+  --muted: #5d6a65;
+  --line: #dde3e0;
+  --accent: #2e5e4e;
+  --accent-soft: #e5efeb;
+  --warn: #9a5b12;
+  --warn-soft: #f6ecdf;
+  --font: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131816; --surface: #1a201e; --fg: #e4ebe8; --muted: #9aa8a2; --line: #2c3532;
+    --accent: #7cc4a9; --accent-soft: #1f3029; --warn: #e0a85c; --warn-soft: #33281a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131816; --surface: #1a201e; --fg: #e4ebe8; --muted: #9aa8a2; --line: #2c3532;
+  --accent: #7cc4a9; --accent-soft: #1f3029; --warn: #e0a85c; --warn-soft: #33281a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1500px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 56px; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; max-width: 75ch; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 0; font-weight: 700; text-wrap: balance; }
+h2 { font-size: 1.2rem; margin: 0 0 10px; font-weight: 600; }
+.lead { color: var(--muted); margin: 0; }
+.picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.pick { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.pick h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.pick .when { color: var(--accent); font-weight: 500; font-size: .9rem; }
+.pick p { margin: 0; color: var(--muted); font-size: .92rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; color: var(--muted); font-size: .92rem; }
+.controls label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; color: var(--fg); }
+.controls input { width: 17px; height: 17px; accent-color: var(--accent); }
+.scroller { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 1680px; font-size: .9rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+thead th { position: sticky; top: 0; background: var(--surface); z-index: 2; font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
+th button { all: unset; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+th button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+th button[aria-sort="descending"]::after { content: "↓"; color: var(--accent); }
+th button[aria-sort="ascending"]::after { content: "↑"; color: var(--accent); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--accent-soft); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+th.num { text-align: right; }
+td.proj { position: sticky; left: 0; background: var(--surface); z-index: 1; min-width: 190px; border-right: 1px solid var(--line); }
+tbody tr:hover td.proj { background: var(--accent-soft); }
+td.proj a { color: var(--fg); font-weight: 600; text-decoration: none; }
+td.proj a:hover { color: var(--accent); text-decoration: underline; }
+.sub { display: block; color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.dev-ok { color: var(--accent); font-weight: 600; }
+.dev-no { color: var(--warn); font-weight: 600; }
+td.desc { min-width: 300px; max-width: 360px; }
+td.fit { min-width: 260px; max-width: 320px; }
+td.lic { min-width: 190px; }
+td.dl { min-width: 150px; }
+.note { color: var(--muted); font-size: .82rem; display: block; margin-top: 2px; white-space: normal; }
+.flag { display: block; margin-top: 6px; padding: 6px 8px; background: var(--warn-soft); color: var(--warn); border-radius: 4px; font-size: .82rem; }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px 32px; }
+.legend section { min-width: 0; }
+.legend p, .legend li { color: var(--muted); font-size: .92rem; margin: 0 0 6px; max-width: 70ch; }
+.legend ul { margin: 0; padding-left: 18px; }
+.legend b { color: var(--fg); font-weight: 600; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 14px; }
+@media (max-width: 600px) { h1 { font-size: 1.5rem; } .wrap { padding-inline: 16px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Open-source CRM для бизнеса по каркасным домам</h1>
+    <p class="lead">13 проектов с GitHub. Звёзды, участники, лицензии и скачивания сняты через GitHub API и Docker Hub 5 октября 2026. Заголовки столбцов с числами кликабельны, по ним можно сортировать.</p>
+  </header>
+
+  <section>
+    <h2>Что выбрать</h2>
+    <div class="picks">
+      <div class="pick">
+        <h3>Twenty</h3>
+        <span class="when">Своя CRM под процесс продажи дома</span>
+        <p>Можно завести свои объекты: участок, проект дома, смета, этап стройки. Самый живой проект в списке, современный интерфейс, подтверждённый разработчик.</p>
+      </div>
+      <div class="pick">
+        <h3>Frappe CRM + ERPNext</h3>
+        <span class="when">CRM плюс сметы, закупки и проекты</span>
+        <p>Одна система от заявки до закупки материалов и учёта стройки. Больше 5 млн скачиваний Docker-образа ERPNext.</p>
+      </div>
+      <div class="pick">
+        <h3>EspoCRM</h3>
+        <span class="when">Быстро и дёшево запустить</span>
+        <p>Простая классическая CRM на PHP, работает на обычном хостинге. Сущности и поля настраиваются без программиста.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="controls">
+      <label for="onlyVerified"><input type="checkbox" id="onlyVerified"> Только подтверждённые разработчики</label>
+      <span id="count"></span>
+    </div>
+  </section>
+
+  <div class="scroller">
+    <table id="crm">
+      <thead>
+        <tr>
+          <th>Проект</th>
+          <th>Разработчик</th>
+          <th class="num"><button data-key="stars">Звёзды</button></th>
+          <th class="num"><button data-key="forks">Форки</button></th>
+          <th class="num"><button data-key="docker">Скачивания Docker</button></th>
+          <th class="num"><button data-key="gh">Скачивания релизов GitHub</button></th>
+          <th class="num"><button data-key="contrib">Участники</button></th>
+          <th><button data-key="pushed">Последний коммит</button></th>
+          <th>Стек</th>
+          <th>Лицензия</th>
+          <th>Описание</th>
+          <th>Для каркасных домов</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <section>
+      <h2>Как читать скачивания</h2>
+      <p>GitHub не считает скачивания исходного кода. Поэтому в таблице две метрики, которые можно проверить:</p>
+      <ul>
+        <li><b>Docker</b>: сколько раз скачали образ с Docker Hub. Так ставят большинство CRM, поэтому это главная цифра. Обновления тоже считаются, так что это не число компаний.</li>
+        <li><b>Релизы GitHub</b>: скачивания файлов, приложенных к релизам. Ноль значит, что проект не выкладывает туда файлы, а не что им никто не пользуется.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Что значат лицензии</h2>
+      <ul>
+        <li><b>MIT</b>: делайте с кодом что угодно, в том числе закрытый коммерческий продукт.</li>
+        <li><b>GPL-3.0, LGPL-3.0</b>: для своей CRM ограничений нет. Если будете продавать или передавать программу другим, придётся открыть свои изменения.</li>
+        <li><b>AGPL-3.0</b>: то же, что GPL, но ещё и при доступе через интернет. Для внутренней CRM своей компании обычно не мешает. Если захотите продавать её как сервис другим фирмам, исходники доработок придётся открыть.</li>
+        <li><b>Своя лицензия</b>: прочитать условия перед использованием.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Подтверждённый разработчик</h2>
+      <p>Организация доказала GitHub, что владеет доменом своего сайта. Значит, за проектом стоит реальная компания. Накрутку звёзд это не исключает, список поставивших звёзды я не проверял.</p>
+      <p>Русский интерфейс по памяти есть у Odoo, Dolibarr, EspoCRM, Frappe и SuiteCRM, но в репозиториях это не проверено.</p>
+    </section>
+  </div>
+
+  <footer>Источники: api.github.com (репозитории, релизы, участники, лицензии), hub.docker.com (счётчики скачиваний образов). Данные на 05.10.2026.</footer>
+</div>
+
+<script>
+const rows = [
+  { name: "Twenty", repo: "twentyhq/twenty", dev: "Twenty", site: "twenty.com", ok: true,
+    stars: 57929, forks: 9426, docker: 2718855, dockerNote: "twentycrm/twenty", gh: 0, contrib: 763, pushed: "2026-10-05",
+    stack: "TypeScript: React, NestJS, PostgreSQL",
+    lic: "AGPL-3.0", licNote: "часть файлов под коммерческой Enterprise-лицензией",
+    desc: "Открытая альтернатива Salesforce. Свои объекты и поля, канбан сделок, представления-таблицы, автоматизации, API, AI-функции.",
+    fit: "Лучший вариант, чтобы собрать CRM под свой процесс: заявка, замер, проект, смета, договор, этапы стройки, оплаты." },
+  { name: "Odoo", repo: "odoo/odoo", dev: "Odoo SA", site: "odoo.com", ok: true,
+    stars: 54829, forks: 33931, docker: 54784097, dockerNote: "официальный образ odoo", gh: null, ghNote: "релизы не публикует", contrib: 4305, pushed: "2026-10-05",
+    stack: "Python, PostgreSQL",
+    lic: "LGPL-3.0", licNote: "это Community-версия; Enterprise-модули платные (не проверял, какие)",
+    desc: "Полная ERP из модулей: CRM, продажи, КП, проекты, склад, закупки, бухгалтерия, сайт.",
+    fit: "Закрывает весь цикл от заявки до стройки, но система тяжёлая: без интегратора или долгой настройки не обойтись." },
+  { name: "ERPNext", repo: "frappe/erpnext", dev: "Frappe", site: "frappe.io", ok: true,
+    stars: 39796, forks: 13023, docker: 5489793, dockerNote: "frappe/erpnext", gh: 6214, contrib: 943, pushed: "2026-10-05",
+    stack: "Python (фреймворк Frappe), MariaDB",
+    lic: "GPL-3.0", licNote: "",
+    desc: "ERP: продажи, закупки, склад, проекты, бухгалтерия, производство, кадры.",
+    fit: "Сметы, закупка материалов, учёт объектов и бригад. Ставится вместе с Frappe CRM." },
+  { name: "Frappe CRM", repo: "frappe/crm", dev: "Frappe", site: "frappe.io", ok: true,
+    stars: 3719, forks: 1505, docker: null, dockerNote: "отдельного образа нет, ставится через frappe_docker", gh: 0, contrib: 79, pushed: "2026-10-05",
+    stack: "Vue 3 + Python (Frappe)",
+    lic: "AGPL-3.0", licNote: "",
+    desc: "Лёгкая CRM: лиды, сделки, воронка, звонки, email, WhatsApp, понятный интерфейс.",
+    fit: "Удобный старт: сначала только воронка продаж домов, потом подключить ERPNext для смет и стройки." },
+  { name: "Dolibarr", repo: "Dolibarr/dolibarr", dev: "Dolibarr", site: "dolibarr.org", ok: true,
+    stars: 7685, forks: 3553, docker: 1094442, dockerNote: "dolibarr/dolibarr; основная раздача через SourceForge не учтена", gh: 0, contrib: 1242, pushed: "2026-10-05",
+    stack: "PHP, MySQL / PostgreSQL",
+    lic: "GPL-3.0", licNote: "",
+    desc: "ERP/CRM для малого бизнеса: контрагенты, коммерческие предложения, заказы, счета, склад, поставщики, агенда.",
+    fit: "Простой учёт для небольшой компании: КП по дому, договор, счета, поставщики материалов. Интерфейс старомодный." },
+  { name: "Ever Gauzy", repo: "ever-co/ever-gauzy", dev: "Ever Co", site: "ever.co", ok: true,
+    stars: 8172, forks: 1203, docker: 6128, dockerNote: "everco/gauzy-api; основные образы на ghcr.io не учтены", gh: 10110, contrib: 114, pushed: "2026-10-05",
+    stack: "TypeScript: Angular, NestJS",
+    lic: "AGPL-3.0", licNote: "",
+    desc: "Платформа управления бизнесом: CRM, учёт времени, задачи, проекты, счета, кадры.",
+    fit: "Подходит для учёта работы бригад и задач по объектам. Как CRM продаж слабее остальных." },
+  { name: "EspoCRM", repo: "espocrm/espocrm", dev: "EspoCRM", site: "espocrm.com", ok: true,
+    stars: 3438, forks: 989, docker: 2740350, dockerNote: "espocrm/espocrm", gh: 43560, contrib: 69, pushed: "2026-10-05",
+    stack: "PHP, MySQL",
+    lic: "AGPL-3.0", licNote: "",
+    desc: "Классическая CRM: лиды, сделки, канбан, календарь, email, портал клиента. Сущности настраиваются без кода.",
+    fit: "Самый быстрый и дешёвый запуск на обычном хостинге. Хорошо для отдела продаж из 1–5 человек." },
+  { name: "Atomic CRM", repo: "marmelab/atomic-crm", dev: "Marmelab", site: "marmelab.com", ok: true,
+    stars: 1310, forks: 834, docker: null, dockerNote: "образа нет, разворачивается на Supabase", gh: 0, contrib: 23, pushed: "2026-10-05",
+    stack: "TypeScript: React, shadcn/ui, Supabase",
+    lic: "MIT", licNote: "",
+    desc: "Компактная CRM-основа: контакты, компании, сделки, задачи, заметки.",
+    fit: "Основа для своей разработки вместе с Claude: кода мало, лицензия без ограничений." },
+  { name: "Krayin CRM", repo: "krayin/laravel-crm", dev: "Krayin (Webkul)", site: "krayincrm.com", ok: false,
+    stars: 23967, forks: 1651, docker: 75677, dockerNote: "webkul/krayin, обновлялся в марте 2026", gh: 0, contrib: 64, pushed: "2026-10-02",
+    stack: "PHP: Laravel, Vue",
+    lic: "MIT", licNote: "",
+    desc: "CRM для лидов и продаж: воронка, контакты, коммерческие предложения, email.",
+    fit: "Функционально подходит, лицензия свободная.",
+    flag: "24 тыс. звёзд, но всего 76 тыс. скачиваний Docker и 210 подписчиков у организации. Звёзды могли накрутить." },
+  { name: "NocoBase", repo: "nocobase/nocobase", dev: "NocoBase", site: "nocobase.com", ok: false,
+    stars: 24455, forks: 2902, docker: 1145517, dockerNote: "nocobase/nocobase", gh: 0, contrib: 110, pushed: "2026-10-05",
+    stack: "TypeScript, Node.js",
+    lic: "Своя лицензия", licNote: "NocoBase License Agreement (Сингапур), не стандартная open-source",
+    desc: "No-code-конструктор бизнес-систем: таблицы, формы, процессы, права, AI.",
+    fit: "Можно собрать CRM мышкой под свой процесс. Перед использованием прочитать лицензию." },
+  { name: "SuiteCRM", repo: "SuiteCRM/SuiteCRM", dev: "SuiteCRM (SalesAgility)", site: "suitecrm.com", ok: false,
+    stars: 5779, forks: 2426, docker: 8849875, dockerNote: "bitnami/suitecrm: сторонний образ Bitnami, с 2025 не обновляется", gh: 126698, contrib: 285, pushed: "2026-09-17",
+    stack: "PHP, MySQL",
+    lic: "AGPL-3.0", licNote: "",
+    desc: "Зрелая CRM, наследник SugarCRM: лиды, сделки, КП, договоры, отчёты, процессы.",
+    fit: "Есть всё нужное для продаж, но интерфейс и код устаревшие." },
+  { name: "Django CRM", repo: "Django-CRM/Django-CRM", dev: "BottleCRM", site: "bottlecrm.io", ok: false,
+    stars: 2434, forks: 1054, docker: null, dockerNote: "публичного образа не нашёл", gh: 0, contrib: 49, pushed: "2026-10-02",
+    stack: "Python: Django, SvelteKit",
+    lic: "MIT", licNote: "",
+    desc: "CRM для малого бизнеса: лиды, сделки, КП, счета, задачи, поддержка.",
+    fit: "Подойдёт, если хочется писать на Python.",
+    flag: "Организация на GitHub существует с 2025 года, у неё 2 подписчика." },
+  { name: "Relaticle", repo: "relaticle/relaticle", dev: "Relaticle", site: "relaticle.com", ok: false,
+    stars: 1752, forks: 213, docker: null, dockerNote: "публичного образа не нашёл", gh: 303, contrib: 10, pushed: "2026-10-05",
+    stack: "PHP: Laravel, Filament",
+    lic: "AGPL-3.0", licNote: "",
+    desc: "Молодая CRM с поддержкой AI-агентов: 37 MCP-инструментов, REST API.",
+    fit: "Интересно для связки с Claude, но команда маленькая (10 участников)." }
+];
+
+const fmt = n => n == null ? "—" : n.toLocaleString("ru-RU");
+const fmtDate = s => s.split("-").reverse().join(".");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const tbody = document.querySelector("#crm tbody");
+const onlyVerified = document.getElementById("onlyVerified");
+const count = document.getElementById("count");
+let sortKey = "stars", sortDir = -1;
+
+function render() {
+  const list = rows.filter(r => !onlyVerified.checked || r.ok)
+    .sort((a, b) => {
+      const x = a[sortKey] ?? -1, y = b[sortKey] ?? -1;
+      return (x > y ? 1 : x < y ? -1 : 0) * sortDir;
+    });
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td class="proj"><a href="https://github.com/${r.repo}" target="_blank" rel="noopener">${esc(r.name)}</a><span class="sub">${esc(r.repo)}</span></td>
+      <td>${esc(r.dev)}<span class="sub">${esc(r.site)}</span><span class="${r.ok ? "dev-ok" : "dev-no"}">${r.ok ? "Подтверждён" : "Не подтверждён"}</span>${r.flag ? `<span class="flag">${esc(r.flag)}</span>` : ""}</td>
+      <td class="num">${fmt(r.stars)}</td>
+      <td class="num">${fmt(r.forks)}</td>
+      <td class="num dl">${fmt(r.docker)}<span class="note">${esc(r.dockerNote || "")}</span></td>
+      <td class="num">${fmt(r.gh)}${r.ghNote ? `<span class="note">${esc(r.ghNote)}</span>` : ""}</td>
+      <td class="num">${fmt(r.contrib)}</td>
+      <td class="num">${fmtDate(r.pushed)}</td>
+      <td>${esc(r.stack)}</td>
+      <td class="lic"><b>${esc(r.lic)}</b>${r.licNote ? `<span class="note">${esc(r.licNote)}</span>` : ""}</td>
+      <td class="desc">${esc(r.desc)}</td>
+      <td class="fit">${esc(r.fit)}</td>
+    </tr>`).join("");
+  count.textContent = `Показано: ${list.length} из ${rows.length}`;
+  document.querySelectorAll("th button").forEach(b => {
+    b.setAttribute("aria-sort", b.dataset.key === sortKey ? (sortDir < 0 ? "descending" : "ascending") : "none");
+  });
+}
+
+document.querySelectorAll("th button").forEach(b => b.addEventListener("click", () => {
+  if (sortKey === b.dataset.key) sortDir = -sortDir; else { sortKey = b.dataset.key; sortDir = -1; }
+  render();
+}));
+onlyVerified.addEventListener("change", render);
+render();
+</script>
